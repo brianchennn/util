@@ -92,7 +92,7 @@ func NewFSM(transitions Transitions, callbacks Callbacks) (*FSM, error) {
 //   - on entry callback: call when fsm enter one state, with EntryEvent event
 func (fsm *FSM) SendEvent(state *State, event EventType, args ArgsType, log *logrus.Entry) error {
 	key := eventKey{
-		From:  state.Current(),
+		From:  state.GetCurrent(),
 		Event: event,
 	}
 
@@ -120,7 +120,7 @@ func (fsm *FSM) SendEvent(state *State, event EventType, args ArgsType, log *log
 		}
 		return nil
 	} else {
-		return errors.Errorf("Unknown transition[From: %s, Event: %s]", state.Current(), event)
+		return errors.Errorf("Unknown transition[From: %s, Event: %s]", state.GetCurrent(), event)
 	}
 }
 

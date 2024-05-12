@@ -29,12 +29,12 @@ func newLog() *logrus.Entry {
 func TestState(t *testing.T) {
 	s := NewState(Closed)
 
-	assert.Equal(t, Closed, s.Current(), "Current() failed")
+	assert.Equal(t, Closed, s.GetCurrent(), "GetCurrent() failed")
 	assert.True(t, s.Is(Closed), "Is() failed")
 
 	s.Set(Opened)
 
-	assert.Equal(t, Opened, s.Current(), "Current() failed")
+	assert.Equal(t, Opened, s.GetCurrent(), "GetCurrent() failed")
 	assert.True(t, s.Is(Opened), "Is() failed")
 }
 
@@ -49,10 +49,10 @@ func TestFSM(t *testing.T) {
 		},
 		Callbacks{
 			Opened: func(state *State, event EventType, args ArgsType) {
-				fmt.Printf("event [%+v] at state [%+v]\n", event, state.Current())
+				fmt.Printf("event [%+v] at state [%+v]\n", event, state.GetCurrent())
 			},
 			Closed: func(state *State, event EventType, args ArgsType) {
-				fmt.Printf("event [%+v] at state [%+v]\n", event, state.Current())
+				fmt.Printf("event [%+v] at state [%+v]\n", event, state.GetCurrent())
 			},
 		},
 	)
@@ -67,7 +67,7 @@ func TestFSM(t *testing.T) {
 
 	fakeEvent := EventType("fake event")
 	assert.EqualError(t, f.SendEvent(s, fakeEvent, nil, log),
-		fmt.Sprintf("Unknown transition[From: %s, Event: %s]", s.Current(), fakeEvent))
+		fmt.Sprintf("Unknown transition[From: %s, Event: %s]", s.GetCurrent(), fakeEvent))
 }
 
 func TestFSMInitFail(t *testing.T) {
@@ -84,10 +84,10 @@ func TestFSMInitFail(t *testing.T) {
 		},
 		Callbacks{
 			Opened: func(state *State, event EventType, args ArgsType) {
-				fmt.Printf("event [%+v] at state [%+v]\n", event, state.Current())
+				fmt.Printf("event [%+v] at state [%+v]\n", event, state.GetCurrent())
 			},
 			Closed: func(state *State, event EventType, args ArgsType) {
-				fmt.Printf("event [%+v] at state [%+v]\n", event, state.Current())
+				fmt.Printf("event [%+v] at state [%+v]\n", event, state.GetCurrent())
 			},
 		},
 	)
@@ -105,13 +105,13 @@ func TestFSMInitFail(t *testing.T) {
 		},
 		Callbacks{
 			Opened: func(state *State, event EventType, args ArgsType) {
-				fmt.Printf("event [%+v] at state [%+v]\n", event, state.Current())
+				fmt.Printf("event [%+v] at state [%+v]\n", event, state.GetCurrent())
 			},
 			Closed: func(state *State, event EventType, args ArgsType) {
-				fmt.Printf("event [%+v] at state [%+v]\n", event, state.Current())
+				fmt.Printf("event [%+v] at state [%+v]\n", event, state.GetCurrent())
 			},
 			fakeState: func(state *State, event EventType, args ArgsType) {
-				fmt.Printf("event [%+v] at state [%+v]\n", event, state.Current())
+				fmt.Printf("event [%+v] at state [%+v]\n", event, state.GetCurrent())
 			},
 		},
 	)
