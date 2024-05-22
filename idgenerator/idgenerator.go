@@ -9,12 +9,12 @@ import (
 )
 
 type IDGenerator struct {
-	lock       sync.Mutex
-	minValue   int64
-	maxValue   int64
-	valueRange int64
-	offset     int64
-	usedMap    map[int64]bool
+	Lock       sync.Mutex
+	MinValue   int64
+	MaxValue   int64
+	ValueRange int64
+	Offset     int64
+	UsedMap    map[int64]bool
 }
 
 // Initialize an IDGenerator with minValue and maxValue.
@@ -25,32 +25,32 @@ func NewGenerator(minValue, maxValue int64) *IDGenerator {
 }
 
 func (idGenerator *IDGenerator) init(minValue, maxValue int64) {
-	idGenerator.minValue = minValue
-	idGenerator.maxValue = maxValue
-	idGenerator.valueRange = maxValue - minValue + 1
-	idGenerator.offset = 0
-	idGenerator.usedMap = make(map[int64]bool)
+	idGenerator.MinValue = minValue
+	idGenerator.MaxValue = maxValue
+	idGenerator.ValueRange = maxValue - minValue + 1
+	idGenerator.Offset = 0
+	idGenerator.UsedMap = make(map[int64]bool)
 }
 
 // Allocate and return an id in range [minValue, maxValue]
 func (idGenerator *IDGenerator) Allocate() (int64, error) {
-	idGenerator.lock.Lock()
-	defer idGenerator.lock.Unlock()
+	idGenerator.Lock.Lock()
+	defer idGenerator.Lock.Unlock()
 
-	offsetBegin := idGenerator.offset
+	offsetBegin := idGenerator.Offset
 	for {
-		if _, ok := idGenerator.usedMap[idGenerator.offset]; ok {
+		if _, ok := idGenerator.UsedMap[idGenerator.Offset]; ok {
 			idGenerator.updateOffset()
 
-			if idGenerator.offset == offsetBegin {
+			if idGenerator.Offset == offsetBegin {
 				return 0, errors.New("No available value range to allocate id")
 			}
 		} else {
 			break
 		}
 	}
-	idGenerator.usedMap[idGenerator.offset] = true
-	id := idGenerator.offset + idGenerator.minValue
+	idGenerator.UsedMap[idGenerator.Offset] = true
+	id := idGenerator.Offset + idGenerator.MinValue
 	idGenerator.updateOffset()
 	return id, nil
 }
@@ -58,15 +58,15 @@ func (idGenerator *IDGenerator) Allocate() (int64, error) {
 // param:
 //   - id: id to free
 func (idGenerator *IDGenerator) FreeID(id int64) {
-	if id < idGenerator.minValue || id > idGenerator.maxValue {
+	if id < idGenerator.MinValue || id > idGenerator.MaxValue {
 		return
 	}
-	idGenerator.lock.Lock()
-	defer idGenerator.lock.Unlock()
-	delete(idGenerator.usedMap, id-idGenerator.minValue)
+	idGenerator.Lock.Lock()
+	defer idGenerator.Lock.Unlock()
+	delete(idGenerator.UsedMap, id-idGenerator.MinValue)
 }
 
 func (idGenerator *IDGenerator) updateOffset() {
-	idGenerator.offset++
-	idGenerator.offset = idGenerator.offset % idGenerator.valueRange
+	idGenerator.Offset++
+	idGenerator.Offset = idGenerator.Offset % idGenerator.ValueRange
 }
